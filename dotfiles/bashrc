@@ -1,0 +1,61 @@
+[[ $- != *i* ]] && return
+
+set -o vi
+
+shopt -s histappend
+shopt -s checkwinsize
+
+complete -cf sudo
+
+export GREP_COLOR="1;33"
+export LESS="-R"
+export EDITOR=nvim
+
+alias ls='ls --color=auto'
+alias ll='ls -l --color=auto'
+alias grep='grep --color=auto'
+alias v='nvim'
+alias tmux='tmux -2'
+alias homix='nix-env -i --remove-all homix'
+
+HISTCONTROL=erasedups:ignoredups:ignorespace
+HISTFILE="$HOME/.bash_history"
+HISTFILESIZE=-1
+HISTSIZE=-1
+
+test -z "$TMUX" && exec tmux
+
+haskell-shell() {
+    nix-shell -p "haskellPackages.ghcWithPackages (pkgs: with pkgs; [$@])"
+}
+
+hs-envrc() {
+    declare -a pkgs=("brittany" "ghcid" "hlint" "cabal-install" "hasktags" "haskdogs")
+    echo "use nix" > .envrc
+    for pkg in "${pkgs[@]}"; do
+	echo "use nix -p haskellPackages.${pkg}" >> .envrc
+    done
+}
+
+default-nix() {
+  echo "{ pkgs ? import <nixpkgs> {} }:" > default.nix
+  echo "pkgs.haskellPackages.developPackage { root = ./.; }" >> default.nix
+}
+
+prompt_command () {
+    local rts=$?
+    local w=$(echo "${PWD/#$HOME/~}" | sed 's/.*\/\(.*\/.*\/.*\)$/\1/') # pwd max depth 3
+# pwd max length L, prefix shortened pwd with m
+    local L=30 m='...'
+    [ ${#w} -gt $L ] && { local n=$((${#w} - $L + ${#m}))
+    local w="\[\033[0;32m\]${m}\[\033[0;37m\]${w:$n}\[\033[0m\]" ; } \
+    ||   local w="\[\033[0;37m\]${w}\[\033[0m\]"
+# different colors for different return status
+    [ $rts -eq 0 ] && \
+    local p="\[\033[0;36m\]>\[\033[1;36m\]>\[\033[m\]" || \
+    local p="\[\033[0;31m\]>\[\033[1;31m\]>\[\033[m\]"
+    PS1="${w} ${p} "
+    history -a; history -c; history -r
+    eval "$(direnv hook bash)"
+}
+PROMPT_COMMAND=prompt_command

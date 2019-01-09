@@ -1,0 +1,135 @@
+"" Make vim less annoying
+set nocompatible
+filetype plugin indent on
+set autoread
+set lazyredraw
+set noerrorbells
+set timeout timeoutlen=1000 ttimeoutlen=100
+
+"" Add some color
+syntax enable
+set background=dark
+colorscheme solarized
+set termguicolors
+set showmatch
+set synmaxcol=120
+
+"" TODO - configure backup and tmp files
+
+"" Use spaces instead of tabs
+set expandtab
+set smarttab
+set tabstop=2
+set shiftwidth=2
+set softtabstop=2
+set autoindent
+set backspace=indent,eol,start
+
+"" Highlight trailing whitespace
+highlight ExtraWhitespace ctermbg=red guibg=red
+au ColorScheme * highlight ExtraWhitespace guibg=red
+au BufEnter * match ExtraWhitespace /\s\+$\|\t/
+au InsertEnter * match ExtraWhitespace /\s\+\%#\@<!$/
+au InsertLeave * match ExtraWhiteSpace /\s\+$/
+
+"" Configure title and status bar
+set laststatus=2
+set report=0
+set showcmd
+
+"" Enable line numbers
+set number
+set numberwidth=5
+
+"" Scrolling behavior
+set scrolloff=10
+set sidescrolloff=10
+
+"" Better tab completion
+set wildmenu
+set wildmode=list:longest
+set ofu=syntaxcomplete#Complete
+set completeopt+=longest
+set complete+=k
+au Filetype text setlocal dictionary+=/usr/share/dict/words
+
+"" Supertab settings
+let g:SuperTabDefaultCompletionType = "context"
+let g:SuperTabLongestEnhanced = 1
+let g:SuperTabLongestHighlight = 1
+
+"" Better search behavior
+set incsearch
+set ignorecase
+set smartcase
+set infercase
+
+"" Search for selected text, forwards or backwards.
+vnoremap <silent> * :<C-U>
+  \let old_reg=getreg('"')<Bar>let old_regtype=getregtype('"')<CR>
+  \gvy/<C-R><C-R>=substitute(
+  \escape(@", '/\.*$^~['), '\_s\+', '\\_s\\+', 'g')<CR><CR>
+  \gV:call setreg('"', old_reg, old_regtype)<CR>
+vnoremap <silent> # :<C-U>
+  \let old_reg=getreg('"')<Bar>let old_regtype=getregtype('"')<CR>
+  \gvy?<C-R><C-R>=substitute(
+  \escape(@", '?\.*$^~['), '\_s\+', '\\_s\\+', 'g')<CR><CR>
+  \gV:call setreg('"', old_reg, old_regtype)<CR>
+
+"" Ignore whitespace and case in vimdiff
+set diffopt+=iwhite
+set diffopt+=icase
+
+"" Automatically leave insert mode after 15 seconds of inactivity
+au CursorHoldI * stopinsert
+au InsertEnter * let updaterestore=&updatetime | set updatetime=15000
+au InsertLeave * let &updatetime=updaterestore
+
+"" Set leader to ,
+let mapleader = ","
+let g:mapleader = ","
+
+"" Mappings
+"" t => down
+"" T => join lines
+"" n => up
+"" N => help
+"" s => right
+"" S => screen bottom
+"" j => jump(til)
+"" J => jump(til) previous
+"" k => klobber(subst) char
+"" K => klobber(subst) line
+"" l => leap(next)
+"" L => leap(previous)
+"" - => beg line
+"" _ => end line
+no t j
+no T J
+no n k
+no N K
+no s l
+no S L
+no j t
+no J T
+no k s
+no K S
+no l n
+no L N
+no - ^
+no _ $
+
+map ; :
+inoremap jj <Esc>
+nmap <leader>s :set spell!<CR>
+nmap <leader>p :set paste!<CR>
+nmap <leader>h :set hlsearch!<CR>
+nmap <leader>n :exec &nu ? "set rnu" : "set nu"<CR>
+nmap <leader>c :exec &cc=="" ? "set cc=80" : "set cc="<CR>
+nmap <leader>x :exec &cuc && &cul ? "set nocuc nocul" : "set cuc cul"<CR>
+nmap <leader>w :%s/\s\+$//g<CR>
+
+let g:airline_powerline_fonts=1
+
+"" Visualize tabs
+let g:indentLine_char = '│'
